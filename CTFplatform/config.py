@@ -18,7 +18,12 @@ def _normalize_db_url(url):
     """Heroku/Neon/Supabase style URLs use the legacy `postgres://` scheme
     which SQLAlchemy 1.4+ rejects with 'Can't load plugin: postgres'."""
     if url and url.startswith('postgres://'):
-        return 'postgresql://' + url[len('postgres://'):]
+        url = 'postgresql://' + url[len('postgres://'):]
+    
+    # Force psycopg2 driver to avoid SQLAlchemy trying to load psycopg3
+    if url and url.startswith('postgresql://'):
+        url = 'postgresql+psycopg2://' + url[len('postgresql://'):]
+        
     return url
 
 
