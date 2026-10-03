@@ -1,0 +1,4 @@
+Sumit's public onboarding notes:
+- VPN setup steps are in the wiki
+- Ping ayush for repo access
+- Reminder to self: ask tejas why hr_confidential still has old review docs in it

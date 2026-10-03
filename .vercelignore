@@ -1,0 +1,13 @@
+.git
+**/__pycache__
+**/*.pyc
+CTFplatform/database/*.db
+CTFplatform/database/.secret_key
+CTFplatform/data
+CTFplatform/labs
+CTFplatform/cyberlab
+CTFplatform/tests
+CTFplatform/*_sync*.py
+CTFplatform/requirements_sync*.txt
+CTFplatform/test_*.py
+.env

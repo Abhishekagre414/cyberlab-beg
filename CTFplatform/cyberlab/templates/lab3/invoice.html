@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Invoice #{{ invoice_id }}{% endblock %}
+{% block content %}
+<h1>Invoice #{{ invoice_id }}</h1>
+
+<div class="panel">
+  <table>
+    <tr><th>Owner</th><td>{{ data.owner }}</td></tr>
+    <tr><th>Amount</th><td>{{ data.amount }}</td></tr>
+    <tr><th>Note</th><td>{{ data.note }}</td></tr>
+  </table>
+</div>
+
+{% include "partials/http_panel.html" %}
+
+{% if is_own %}
+<p style="color:var(--muted)">This is your own invoice — the request was authorized because your cookie already matched this ID. Try requesting a different invoice ID without changing the cookie first, then see what changing the cookie does.</p>
+{% elif is_fragment %}
+<div class="panel success">
+  <strong>✅ Found one flag fragment</strong>
+  <p>This is half the flag. Find the other internal-ops invoice with the matching "fragment" note (same technique), then concatenate the two pieces in order (1 of 2, then 2 of 2).</p>
+</div>
+{% else %}
+<p style="color:var(--muted)">You're viewing someone else's invoice — the authorization bug is demonstrated, but this note isn't a flag fragment. Some notes here are deliberate decoys shaped to look like flags. Keep exploring.</p>
+{% endif %}
+
+<h2>What's happening under the hood</h2>
+<ul class="checklist">
+  <li>Your real, signed session says your user id is <code>{{ real_session_id }}</code>.</li>
+  <li>The authorization check for this page actually used the <code>x_client_user_id</code> cookie instead, which currently reads <code>{{ claimed_id }}</code>.</li>
+  <li>Because that cookie is plain, unsigned, and fully client-editable, setting it to any invoice ID and requesting that same ID passes the check — regardless of who you really are.</li>
+</ul>
+
+{% include "partials/lab_widgets.html" %}
+
+<a class="btn secondary" href="/lab3/">Back to Lab 3</a>
+{% endblock %}

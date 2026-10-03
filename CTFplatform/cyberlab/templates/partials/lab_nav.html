@@ -1,0 +1,19 @@
+{% if prev_lab or next_lab %}
+<div class="panel" style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; padding:10px 16px;">
+  <div>
+    {% if prev_lab %}
+    <a href="{{ prev_lab.url }}" style="color:var(--muted);">← Previous: {{ prev_lab.title }} <span class="badge {{ DIFFICULTY_CLASS_MAP[prev_lab.id] }}">{{ prev_lab.difficulty }}</span></a>
+    {% else %}
+    <span style="color:var(--muted); font-size:0.9em;">You're on the first lab</span>
+    {% endif %}
+  </div>
+  <div style="text-align:right;">
+    {% if next_lab %}
+    <a href="{{ next_lab.url }}" style="color:var(--muted);">Next: {{ next_lab.title }} <span class="badge {{ DIFFICULTY_CLASS_MAP[next_lab.id] }}">{{ next_lab.difficulty }}</span> →</a>
+    {% else %}
+    <span style="color:var(--muted); font-size:0.9em;">You're on the last lab</span>
+    {% endif %}
+  </div>
+</div>
+<p style="color:var(--muted); font-size:0.82em; margin-top:-6px;">Recommended order shown — labs can be done in any order.</p>
+{% endif %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Lab 1 — Ops Portal Login{% endblock %}
+{% block content %}
+<h1>TrinetLayer Internal Ops — Login</h1>
+
+{% if success %}
+<div class="panel success">
+  <strong>✅ Logged in as admin</strong>
+  <p>You found basic-auth creds hidden in the page source, used them to get into the backup archive, ignored a decoy file, decoded a ROT13'd hint in the real one, and requested the unlinked production backup directly.</p>
+  <div class="flag">{{ flag }}</div>
+</div>
+{% include "partials/http_panel.html" %}
+<h2>What actually happened</h2>
+<ul class="checklist">
+  <li>The homepage's rendered content looked ordinary — the interesting part was an HTML comment only visible via "View Page Source," containing base64-encoded basic-auth credentials for the backup archive.</li>
+  <li>Those credentials gated the <code>/backup/</code> folder, but basic auth alone isn't real authorization — it was reachable by literally anyone who read the source.</li>
+  <li>The listing had a decoy file designed to waste time, plus the real expired file whose comment described the current naming convention — with the sensitive part (the environment name) ROT13-encoded so a casual glance wouldn't reveal it.</li>
+  <li>The actual production backup was never linked anywhere, but existed and was reachable once you knew its exact name.</li>
+</ul>
+<h2>How to prevent this for real</h2>
+<ul class="checklist">
+  <li>Never rely on client-visible artifacts (HTML comments, JS files, page source) to hold credentials, even "temporary" or "read-only" ones — treat anything shipped to the browser as public.</li>
+  <li>Basic auth on a static file directory is not a substitute for real, server-side authorization tied to identity and role.</li>
+  <li>Obfuscation (ROT13, base64) is not encryption and provides no real security — it only slows down automated scanning, not a determined human or a slightly-better scanner.</li>
+  <li>Delete backup artifacts entirely instead of rotating-and-keeping — a rotated credential in a file that still exists is still a map to your infrastructure.</li>
+</ul>
+{% else %}
+<form method="POST" action="/lab1/login">
+  <label for="username">Username</label>
+  <input type="text" id="username" name="username" autocomplete="off">
+  <label for="password">Password</label>
+  <input type="password" id="password" name="password">
+  <button type="submit">Log in</button>
+</form>
+{% if error %}<p class="error-msg">{{ error }}</p>{% endif %}
+{% endif %}
+{% endblock %}

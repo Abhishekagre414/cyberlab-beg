@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Lab 4 — Path Traversal{% endblock %}
+{% block content %}
+<h1>Lab 4 — Escape the Downloads Folder <span class="badge {{ DIFFICULTY_CLASS_MAP['lab4'] }}">{{ DIFFICULTY_MAP['lab4'] }}</span></h1>
+{% include "partials/lab_nav.html" %}
+<p style="color:var(--muted)">Category: Path Traversal</p>
+
+<div class="panel objective">
+  <strong>Objective</strong>
+  <p>This file portal lets you download files from a public folder via <code>/lab4/download?file=&lt;name&gt;</code>. There's more than one folder sitting next to the public one — only one of them actually matters. Get the flag out of it.</p>
+</div>
+
+{% if mode != 'challenge' %}
+<div class="panel why">
+  <strong>Why this happens in the real world</strong>
+  <p>The download endpoint tries to defend itself by stripping the sequence <code>../</code> out of your filename before using it. A filter that only runs once, and only looks for one exact pattern, can often be defeated by input that doesn't contain that pattern <em>yet</em>, but produces it once the filter has already run.</p>
+</div>
+{% endif %}
+
+{% if mode == 'beginner' %}
+{% include "partials/learn_before.html" %}
+{% endif %}
+
+{% if mode != 'challenge' %}
+<div class="panel">
+  <strong>Where to start</strong>
+  <ul class="checklist">
+    <li>Confirm the filter exists first: a plain traversal attempt just quietly does nothing.</li>
+    <li>Read the public files carefully — team notes sometimes casually mention things (folder names, tools, people) that turn out to matter later. That's true in this lab too.</li>
+    <li>Once you get past the filter, don't assume the first sibling folder you find is the right one.</li>
+  </ul>
+</div>
+{% endif %}
+
+<div class="panel">
+  <strong>Public files</strong>
+  <ul class="checklist">
+    {% for f in files %}
+    <li><a href="/lab4/download?file={{ f }}">{{ f }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% include "partials/lab_widgets.html" %}
+
+{% endblock %}

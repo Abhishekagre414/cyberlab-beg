@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Lab 2 — Login Bypass{% endblock %}
+{% block content %}
+<h1>Lab 2 — Login Bypass <span class="badge {{ DIFFICULTY_CLASS_MAP['lab2'] }}">{{ DIFFICULTY_MAP['lab2'] }}</span></h1>
+{% include "partials/lab_nav.html" %}
+<p style="color:var(--muted)">Category: SQL Injection + Account Enumeration</p>
+
+<div class="panel objective">
+  <strong>Objective</strong>
+  <p>Log in to <a href="/lab2/login">/lab2/login</a> as the team's admin account — without knowing its password, and without being told its username. Nothing on the login page reveals it this time.</p>
+</div>
+
+{% if mode != 'challenge' %}
+<div class="panel why">
+  <strong>Why this happens in the real world</strong>
+  <p>Two separate bugs chain together here. First: a "forgot password" feature that responds differently depending on whether a username exists lets you enumerate valid accounts before you've broken anything. Second: the login form still builds a raw SQL string from your input — a stray quote can end that string early and let you add your own logic.</p>
+</div>
+{% endif %}
+
+{% if mode == 'beginner' %}
+{% include "partials/learn_before.html" %}
+{% endif %}
+
+{% if mode != 'challenge' %}
+<div class="panel">
+  <strong>Where to start</strong>
+  <ul class="checklist">
+    <li>Look for any account-related feature besides the login form itself. Something that reacts differently to "this account exists" vs. "it doesn't" is a classic real-world leak.</li>
+    <li>The team roster isn't secret (sumit, ayush, tejas, sahil, sayali) — but none of those are the admin account. Think about what an ops/admin account is usually named, and confirm your guess with the tool from the previous hint.</li>
+    <li>Once you have a real username, the injection itself still works the classic way — but the login endpoint now strips the most common comment sequence out of your input. That doesn't mean commenting out the rest of the query is impossible; SQLite understands more than one way to do it.</li>
+  </ul>
+</div>
+{% endif %}
+
+<a class="btn" href="/lab2/login">Go to Login Page</a>
+<a class="btn secondary" href="/lab2/forgot-password">Forgot Password Tool</a>
+
+{% include "partials/lab_widgets.html" %}
+{% endblock %}

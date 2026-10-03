@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Lab 3 — IDOR{% endblock %}
+{% block content %}
+<h1>Lab 3 — Peek at Anyone's Invoice <span class="badge {{ DIFFICULTY_CLASS_MAP['lab3'] }}">{{ DIFFICULTY_MAP['lab3'] }}</span></h1>
+{% include "partials/lab_nav.html" %}
+<p style="color:var(--muted)">Category: Broken Access Control (IDOR via client-trusted identity)</p>
+
+<div class="panel objective">
+  <strong>Objective</strong>
+  <p>You're logged in (a real, signed session was just created for you). Your own invoice lives at <a href="/lab3/invoice/{{ current_id }}">/lab3/invoice/{{ current_id }}</a>. The flag is split into two fragments on two different internal-ops invoices somewhere in the range. Find both and put them together. Watch out: at least one note is a deliberate decoy shaped to look like a flag.</p>
+</div>
+
+{% if mode != 'challenge' %}
+<div class="panel why">
+  <strong>Why this happens in the real world</strong>
+  <p>This app doesn't just check the ID in the URL and call it a day — there's an actual authorization check happening server-side. The bug is <em>what</em> that check trusts. Somewhere in your browser's state for this site is a value the app uses to decide who you are for authorization purposes — and it isn't the secure session.</p>
+</div>
+{% endif %}
+
+{% if mode == 'beginner' %}
+{% include "partials/learn_before.html" %}
+{% endif %}
+
+{% include "partials/lab_widgets.html" %}
+
+<a class="btn" href="/lab3/invoice/{{ current_id }}">View My Invoice</a>
+{% endblock %}

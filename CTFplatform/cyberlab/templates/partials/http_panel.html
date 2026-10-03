@@ -1,0 +1,13 @@
+<div class="panel" style="font-size:0.85em;">
+  <strong style="font-size:1.05em;">HTTP Request / Response</strong>
+  <p style="color:var(--muted); margin: 4px 0 8px;">This is the actual request that loaded this page — the same thing you'd see in browser DevTools (Network tab) or Burp Suite's proxy history.</p>
+<pre>REQUEST
+
+{{ request.method }} {{ request.full_path }} HTTP/1.1
+Host: {{ request.host }}
+Cookie: {{ request.headers.get('Cookie', '(none)') }}
+
+RESPONSE
+
+HTTP/1.1 200 OK</pre>
+</div>

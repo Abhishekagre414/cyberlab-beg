@@ -1,0 +1,8 @@
+<div class="panel">
+  <strong>🧭 Your learning stages</strong>
+  <ul class="stage-list">
+    {% for s in stages %}
+    <li class="{{ 'done' if s.done else 'pending' }}">[{{ '✓' if s.done else ' ' }}] {{ s.label }}</li>
+    {% endfor %}
+  </ul>
+</div>

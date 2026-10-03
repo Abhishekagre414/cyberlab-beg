@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lab.name }} | HACK THE AI{% endblock %}
+{% block page_title %}MANUAL LAB: {{ lab.name }}{% endblock %}
+
+{% block content %}
+<div class="lab-detail-container" style="max-width: 800px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="card-title">{{ lab.name }}</h2>
+            <div class="badges">
+                <span class="badge badge-primary">{{ lab.topic }}</span>
+                <span class="badge badge-secondary">{{ lab.difficulty }}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <h3>Objective</h3>
+            <p style="margin-bottom: 2rem; line-height: 1.6;">{{ lab.description }}</p>
+            
+            <div class="lab-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; background: var(--surface-hover); padding: 1rem; border-radius: 8px;">
+                <div>
+                    <strong>Target Type:</strong> {{ lab.target_type|upper }}
+                </div>
+                <div>
+                    <strong>Target OS:</strong> {{ lab.target_os|upper }}
+                </div>
+            </div>
+            
+            <div class="alert alert-info" style="margin-bottom: 2rem; padding: 1rem; background: rgba(var(--info-rgb), 0.08); border-left: 4px solid var(--info);">
+                <p><strong>Note:</strong> This is a manual lab. You will need to start the isolated environment, perform your own reconnaissance and exploitation, and find the flag.</p>
+            </div>
+        </div>
+        <div class="card-footer" style="text-align: right;">
+            <a href="{{ url_for('labs.manual_labs') }}" class="btn btn-secondary">Back to Labs</a>
+            <a href="{{ url_for('labs.manual_lab_environment', lab_id=lab.id) }}" class="btn btn-primary" style="margin-left: 1rem;">Enter Environment</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

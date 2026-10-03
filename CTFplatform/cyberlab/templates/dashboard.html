@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — CyberLab Sim{% endblock %}
+{% block content %}
+<h1>Your Progress</h1>
+
+<div class="panel">
+  <p style="margin-bottom:4px;">Overall Progress: <strong>{{ overall }}%</strong> <span style="color:var(--muted); font-size:0.85em;">(lab completion — not affected by hints used)</span></p>
+  <div style="background:#010409; border-radius:5px; height:12px; overflow:hidden; margin-bottom:14px;">
+    <div style="background:var(--green); height:100%; width:{{ overall }}%; transition:width .3s;"></div>
+  </div>
+  <p>Labs Completed: <strong>{{ labs_completed }}/{{ total_labs }}</strong></p>
+  <p>Total Score: <strong>{{ total_score }}/{{ max_possible }}</strong></p>
+  <p>Total Hints Used: <strong>{{ total_hints_used }}</strong></p>
+  <p>Current Learning Mode: <strong>{{ MODE_LABELS[current_mode] }}</strong></p>
+  <p style="margin-bottom:0;">Recommended Next Lab:
+    {% if recommended_lab %}
+      <strong><a href="{{ recommended_lab.url }}">{{ recommended_lab.title }}</a></strong>
+    {% else %}
+      <strong>🎉 All labs completed!</strong>
+    {% endif %}
+  </p>
+</div>
+
+<table>
+  <tr><th>Lab</th><th>Status</th><th>Score</th></tr>
+  {% for lab in labs %}
+  {% set p = prog[lab.id] %}
+  <tr>
+    <td><a href="{{ lab.url }}">{{ lab.title }}</a></td>
+    <td>
+      {% if p.status == 'completed' %}✅ Completed
+      {% elif p.status == 'in_progress' %}🟡 In Progress
+      {% else %}⚪ Not Started{% endif %}
+    </td>
+    <td>{{ p.score }}/100</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h2 style="margin-top:24px;">Achievements</h2>
+<div class="card-grid">
+  {% for a in achievements %}
+  <div class="panel" style="text-align:center; opacity:{{ '1' if a.earned else '0.4' }};">
+    <div style="font-size:2em;">{{ a.icon }}</div>
+    <strong>{{ a.title }}</strong>
+    <p style="color:var(--muted); font-size:0.85em; margin-top:4px;">{{ a.description }}</p>
+    {% if a.earned %}<p style="color:var(--green); font-size:0.85em; margin-top:4px;">✓ Unlocked</p>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<p style="color:var(--muted); margin-top:20px; font-size:0.85em;">Progress is stored in your browser session — it resets if you clear cookies or switch browsers. Each hint used costs 10 points off that lab's score (minimum 10 for a fully-hinted solve), but never affects your completion percentage or achievements.</p>
+{% endblock %}

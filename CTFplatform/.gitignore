@@ -1,0 +1,6 @@
+
+# secrets & runtime data
+.env
+ssl/*.pem
+certbot-data/
+backups/

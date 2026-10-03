@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Download{% endblock %}
+{% block content %}
+<h1>Download: {{ filename }}</h1>
+
+{% if blocked %}
+<div class="panel">
+  <strong>🛡 Blocked by the lab sandbox</strong>
+  <p>That path tried to leave this project's sandbox folder entirely. This guard exists only so the lab can never touch your real filesystem — it isn't the lesson. You're looking for a folder still inside the file portal's own storage area, just not the public one.</p>
+</div>
+{% else %}
+<div class="panel">
+  <pre>{{ content }}</pre>
+</div>
+{% include "partials/http_panel.html" %}
+
+{% if escaped and found_flag %}
+<div class="panel success">
+  <strong>✅ Escaped the public downloads folder</strong>
+  <p>Your <code>file</code> parameter got past the <code>../</code> filter, escaped <code>downloads/</code>, and this time you picked the right sibling folder.</p>
+  <div class="flag">{{ flag }}</div>
+</div>
+<h2>What actually happened</h2>
+<ul class="checklist">
+  <li>The server did <code>filename.replace("../", "")</code> once, then joined the result onto the downloads folder path and opened whatever that produced.</li>
+  <li>A string like <code>....//</code> doesn't present the exact substring <code>../</code> end-to-end the way a naive attempt would — but removing one matched <code>../</code> from the <em>middle</em> of it leaves the remaining characters forming <code>../</code> again, because the filter only ran once instead of repeating until no matches remained.</li>
+  <li>There was more than one sibling folder to try, and only reading the team's own public notes gave away which one actually held anything sensitive — the same way loose mentions in real internal docs/wikis often leak more than people realize.</li>
+</ul>
+<h2>How to prevent this for real</h2>
+<ul class="checklist">
+  <li>Never try to sanitize a path by stripping bad substrings — resolve the final path with <code>os.path.realpath()</code>/<code>os.path.abspath()</code> and verify it's still inside the intended base directory <em>before</em> opening it.</li>
+  <li>Better still: don't take raw filenames from users at all — map an opaque ID or an allowlisted key to a real filename server-side.</li>
+  <li>Be mindful of what casual internal notes reveal — folder names, tool names, and internal jargon are all reconnaissance value even when nobody meant them to be.</li>
+</ul>
+{% elif escaped %}
+<p style="color:var(--muted)">You escaped <code>downloads/</code> successfully, but this particular file/folder doesn't hold the flag. Keep exploring.</p>
+{% else %}
+<p style="color:var(--muted)">This file is inside the intended public folder — no traversal happening yet. (If you tried a plain <code>../</code> and nothing happened, that's the filter working as intended — you'll need a different shape of input.)</p>
+{% endif %}
+{% endif %}
+
+<a class="btn secondary" href="/lab4/">Back to Lab 4</a>
+{% endblock %}

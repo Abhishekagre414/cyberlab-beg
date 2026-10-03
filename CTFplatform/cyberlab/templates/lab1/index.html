@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Lab 1 — Leaky Backup File{% endblock %}
+{% block content %}
+<h1>Lab 1 — Leaky Backup File <span class="badge {{ DIFFICULTY_CLASS_MAP['lab1'] }}">{{ DIFFICULTY_MAP['lab1'] }}</span></h1>
+{% include "partials/lab_nav.html" %}
+<p style="color:var(--muted)">Category: Sensitive Information Disclosure</p>
+
+<div class="panel objective">
+  <strong>Objective</strong>
+  <p>Internal ops portal for a small team (sumit, ayush, tejas, sahil, sayali). A current admin credential is reachable by anyone who follows the trail all the way through. Find it and log in at <a href="/lab1/login">/lab1/login</a> to capture the flag.</p>
+</div>
+
+{% if mode != 'challenge' %}
+<div class="panel why">
+  <strong>Why this happens in the real world</strong>
+  <p>Teams rotate credentials, rename files, protect folders with basic auth "just in case," and leave engineer-to-engineer notes in config comments assuming nobody outside the team will ever read them. None of these are real access control on their own.</p>
+</div>
+{% endif %}
+
+{% if mode == 'beginner' %}
+{% include "partials/learn_before.html" %}
+{% endif %}
+
+{% if mode != 'challenge' %}
+<div class="panel">
+  <strong>Where to start</strong>
+  <p>No numbered hints this time. Standard recon applies — check what a crawler is told to avoid, and don't take a rendered page at face value; sometimes the interesting part is only in the source.</p>
+</div>
+{% endif %}
+
+{% include "partials/lab_widgets.html" %}
+
+<a class="btn" href="/lab1/login">Go to Login Page</a>
+
+<!-- ops: temporary read-only creds for the backup archive while we finish the migration -- rotate after: {{ auth_hint_b64 }} -->
+{% endblock %}

@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+*.log
+CTFplatform/database/*.db
+CTFplatform/database/.secret_key
+CTFplatform/data/uploaded_labs/
+.vercel
+
+.venv/
+**/.venv/
+*.db
+.env
+**/.env

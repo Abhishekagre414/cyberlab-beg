@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}403 — Access Denied{% endblock %}
+{% block content %}
+<h1>403 — Access Denied</h1>
+<div class="panel">
+  <p>You tried to view invoice #{{ invoice_id }}, but the authorization check for this app didn't allow it.</p>
+  <table>
+    <tr><th>Your real session identity</th><td>{{ real_session_id }}</td></tr>
+    <tr><th>What the authorization check actually used</th><td>{{ claimed_id if claimed_id is not none else "(no client identity cookie found)" }}</td></tr>
+  </table>
+</div>
+<p style="color:var(--muted)">Notice that the check didn't use your real session identity above — it used a separate value from your browser's cookies. That's worth thinking about.</p>
+<a class="btn secondary" href="/lab3/">Back to Lab 3</a>
+{% endblock %}

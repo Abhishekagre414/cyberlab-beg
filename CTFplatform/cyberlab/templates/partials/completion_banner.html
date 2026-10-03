@@ -1,0 +1,33 @@
+{% set concepts = KEY_CONCEPTS_MAP.get(lab_id, []) %}
+<div class="panel success" style="border-left:3px solid var(--green);">
+  <strong style="font-size:1.15em;">🎉 Congratulations!</strong>
+  <p style="margin-top:6px;">Lab Completed: <strong>{{ LAB_TITLES_MAP[lab_id] }}</strong></p>
+
+  {% if concepts %}
+  <p style="margin-top:12px;"><strong>What You Learned:</strong></p>
+  <ul class="checklist" style="margin-top:4px;">
+    {% for c in concepts %}
+    <li>✓ {{ c }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <p style="margin-top:12px;">Score Earned: <strong>{{ prog.score }}/100</strong></p>
+
+  {% if next_recommended_lab %}
+  <p style="margin-top:6px;">Next Recommended Lab: <strong>{{ next_recommended_lab.title }}</strong></p>
+  {% else %}
+  <p style="margin-top:6px;"><strong>🎓 You've completed every lab!</strong></p>
+  {% endif %}
+
+  <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+    <a class="btn" href="/dashboard">📊 Go to Dashboard</a>
+    {% if next_recommended_lab %}
+    <a class="btn" href="{{ next_recommended_lab.url }}">▶ Start Next Lab</a>
+    {% endif %}
+    <form method="POST" action="/stage/{{ lab_id }}/remediation" class="inline">
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <button type="submit" class="btn secondary">📖 Read Security Writeup</button>
+    </form>
+  </div>
+</div>

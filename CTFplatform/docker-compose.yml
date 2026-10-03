@@ -1,0 +1,143 @@
+# Production stack: nginx -> gunicorn (web) -> postgres + redis, plus the lab
+# reaper and the isolated CyberLab app.
+#
+#   1. cp .env.example .env   and fill in the values
+#   2. docker compose up -d --build
+#
+services:
+  web:
+    build: .
+    env_file: .env
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-ctfuser}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-ctfdb}
+      - REDIS_URL=redis://redis:6379/0
+      # Talk to Docker through the filtered proxy below, never the raw socket.
+      - DOCKER_HOST=tcp://dockerproxy:2375
+    volumes:
+      # Persist uploaded lab bundles across rebuilds (NOT the source code:
+      # the old `.:/app` mount overrode the built image with the host folder).
+      - uploaded_labs:/app/data/uploaded_labs
+    networks: [default, docker_api]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      dockerproxy:
+        condition: service_started
+    restart: unless-stopped
+
+  # The web app used to mount /var/run/docker.sock directly (and ran as root),
+  # which means any bug in the web app = root on the host. This proxy only
+  # forwards the handful of Docker API calls the lab engine needs and blocks
+  # the dangerous ones (exec, volumes, swarm, secrets, system, ...).
+  dockerproxy:
+    image: tecnativa/docker-socket-proxy:0.2.0
+    environment:
+      - CONTAINERS=1
+      - IMAGES=1
+      - NETWORKS=1
+      - BUILD=1
+      - POST=1          # create/start/stop/remove (needed for labs)
+      - EXEC=0
+      - VOLUMES=0
+      - SECRETS=0
+      - SERVICES=0
+      - SWARM=0
+      - SYSTEM=0
+      - INFO=0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [docker_api]   # internal network: nginx/db/redis can't reach it
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-ctfuser}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      - POSTGRES_DB=${POSTGRES_DB:-ctfdb}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ctfuser} -d ${POSTGRES_DB:-ctfdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - SERVER_NAME=${SERVER_NAME:-_}
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # NGINX_MODE=http (default) or https. https needs ./ssl/fullchain.pem + privkey.pem
+      # (scripts/get_cert.sh or scripts/selfsigned.sh create them).
+      - ./nginx/templates/${NGINX_MODE:-http}.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./certbot-webroot:/var/www/certbot:ro
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+  reaper:
+    build: .
+    entrypoint: []
+    command: python reaper.py
+    environment:
+      - DOCKER_HOST=tcp://dockerproxy:2375
+    networks: [docker_api]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    depends_on:
+      - dockerproxy
+    restart: unless-stopped
+
+  # CyberLab Sim -- the 5 beginner labs on the /challenges page. Bound to
+  # 127.0.0.1 on purpose (intentionally vulnerable code); see DEPLOYMENT.md
+  # for how to expose it safely on a remote server.
+  cyberlab:
+    build: ./cyberlab
+    ports:
+      - "127.0.0.1:5050:5000"
+    environment:
+      - FLASK_DEBUG=0
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+networks:
+  default: {}
+  docker_api:
+    internal: true
+
+volumes:
+  pgdata:
+  redisdata:
+  uploaded_labs:

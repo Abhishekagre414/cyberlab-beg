@@ -1,0 +1,17 @@
+.git
+**/__pycache__
+**/*.pyc
+.env
+database/*.db
+database/.secret_key
+tests
+test_*.py
+*_sync*.py
+requirements_sync*.txt
+*.md
+
+.env
+ssl
+certbot-data
+backups
+certbot-webroot

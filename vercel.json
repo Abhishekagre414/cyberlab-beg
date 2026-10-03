@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 30,
+      "includeFiles": "CTFplatform/**",
+      "excludeFiles": "{CTFplatform/labs/**,CTFplatform/data/**,CTFplatform/cyberlab/**,CTFplatform/database/**,CTFplatform/tests/**,CTFplatform/migrations/**,**/__pycache__/**,**/*.pyc,**/*.md,.git/**}"
+    }
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index" }
+  ]
+}

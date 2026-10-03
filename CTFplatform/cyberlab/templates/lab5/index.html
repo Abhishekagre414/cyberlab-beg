@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Lab 5 — Insecure Deserialization{% endblock %}
+{% block content %}
+<h1>Lab 5 — The YAML That Ran Code <span class="badge {{ DIFFICULTY_CLASS_MAP['lab5'] }}">{{ DIFFICULTY_MAP['lab5'] }}</span></h1>
+{% include "partials/lab_nav.html" %}
+<p style="color:var(--muted)">Category: Insecure Deserialization</p>
+
+<div class="panel objective">
+  <strong>Objective</strong>
+  <p>Tejas built a quick internal "config import" tool for the team's deploy pipeline at <a href="/lab5/import">/lab5/import</a>. It just parses whatever YAML you paste in — get it to reveal the flag. There's also a basic keyword filter in front of it; the obvious first payload you'll think of is blocked.</p>
+</div>
+
+{% if mode != 'challenge' %}
+<div class="panel why">
+  <strong>Why this happens in the real world</strong>
+  <p>YAML isn't just a data format — Python's <code>yaml.load()</code> (without the <code>safe_</code> prefix) can be told, via special tags inside the YAML itself, to construct arbitrary Python objects and even call functions with attacker-chosen arguments. If a config-import feature uses the full loader on YAML a user controls, the "config file" stops being data and becomes a way to make the server run code the developer never wrote.</p>
+  <p style="margin-top:8px; color:var(--muted); font-size:0.88em;">This lab simulates the "call a function" step instead of actually executing anything, so you can see the mechanism completely safely.</p>
+</div>
+{% endif %}
+
+{% if mode == 'beginner' %}
+{% include "partials/learn_before.html" %}
+{% endif %}
+
+{% if mode != 'challenge' %}
+<div class="panel">
+  <strong>Where to start</strong>
+  <ul class="checklist">
+    <li>Research the YAML tag syntax for constructing arbitrary Python objects/calling functions if it's new to you — this is a well-documented, named technique.</li>
+    <li>You're looking for a function capable of running an arbitrary system command. There's more than one standard-library way to do that — if your first idea gets blocked by the filter, that doesn't mean the technique is dead, it means you need a different function name that does the same thing.</li>
+    <li>Once you trigger it, the argument you pass <em>is</em> the command. Aim it at a file called <code>flag.txt</code>.</li>
+  </ul>
+</div>
+{% endif %}
+
+<a class="btn" href="/lab5/import">Go to Config Import</a>
+
+{% include "partials/lab_widgets.html" %}
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Lab 2 — Login{% endblock %}
+{% block content %}
+<h1>Team Portal Login</h1>
+
+<form method="POST" action="/lab2/login">
+  <label for="username">Username</label>
+  <input type="text" id="username" name="username" autocomplete="off">
+  <label for="password">Password</label>
+  <input type="text" id="password" name="password" autocomplete="off">
+  <button type="submit">Log in</button>
+</form>
+
+{% if error %}<p class="error-msg">{{ error }}</p>{% endif %}
+
+{% if user %}
+<div class="panel success">
+  <strong>✅ Logged in as: {{ user.username }} (role: {{ user.role }})</strong>
+  {% if user.role == 'admin' %}
+  <p>You bypassed the login check entirely using SQL injection.</p>
+  <div class="flag">{{ flag }}</div>
+  {% else %}
+  <p>You're in, but as a regular teammate account, not admin. A payload that matches any row will usually return the first one in the table — you'll need to target the admin row specifically.</p>
+  {% endif %}
+</div>
+{% include "partials/http_panel.html" %}
+{% endif %}
+
+{% if user and user.role == 'admin' %}
+<h2>What actually happened</h2>
+<ul class="checklist">
+  <li>The "forgot password" tool responded differently for real vs. fake usernames — that let you confirm <code>root_ops</code> was a real account without needing any credentials.</li>
+  <li>The server built the login query as <code>... WHERE username = '&lt;your input&gt;' AND password = '&lt;your input&gt;'</code>, and strips the literal <code>--</code> sequence out of your input first.</li>
+  <li>SQLite treats an <em>unclosed</em> <code>/*</code> block comment as "ignore everything from here to the end of the statement" — so <code>/*</code> comments out the rest of the query just as effectively as <code>--</code> would have, and the filter never even looks for it.</li>
+</ul>
+<h2>How to prevent this for real</h2>
+<ul class="checklist">
+  <li>Use parameterized queries / prepared statements — never string-format user input into SQL. No amount of keyword-blacklisting closes every hole; SQL has too many equivalent ways to express the same trick.</li>
+  <li>Don't let secondary features (password reset, signup, "check username availability") reveal account existence through different response text, timing, or status codes.</li>
+  <li>Hash passwords (bcrypt/argon2) so injection alone can't compare against a known plaintext value anyway.</li>
+</ul>
+{% endif %}
+
+{% endblock %}

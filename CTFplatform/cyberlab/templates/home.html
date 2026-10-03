@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}CyberLab Sim — Home{% endblock %}
+{% block content %}
+<h1>CyberLab Sim</h1>
+<p style="color:var(--muted)">Five small, realistic labs. Overall progress: <strong>{{ overall }}%</strong> — see the full <a href="/dashboard">📊 Dashboard</a>.</p>
+<div class="panel" style="padding:6px 12px;">
+  <div style="background:#010409; border-radius:5px; height:10px; overflow:hidden;">
+    <div style="background:var(--green); height:100%; width:{{ overall }}%; transition:width .3s;"></div>
+  </div>
+</div>
+
+<div class="card-grid">
+  {% for lab in labs %}
+  {% set p = prog[lab.id] %}
+  <div class="lab-card" style="display:flex; flex-direction:column; text-decoration:none;">
+    <div class="meta">
+      <p style="color:var(--muted); font-size:0.85em; margin:0;">Lab {{ loop.index }} of {{ labs|length }}</p>
+      <h3>{{ lab.title }}</h3>
+      <p>{{ lab.tagline }}</p>
+      <p style="margin-top:4px;">
+        {% if p.status == 'completed' %}<span style="color:var(--green)">✅ Completed — Score {{ p.score }}/100</span>
+        {% elif p.status == 'in_progress' %}<span style="color:var(--yellow)">🟡 In Progress — Score {{ p.score }}/100</span>
+        {% else %}<span style="color:var(--muted)">⚪ Not Started</span>{% endif %}
+      </p>
+    </div>
+    <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center; padding-top:10px;">
+      <span class="badge {{ DIFFICULTY_CLASS_MAP[lab.id] }}">{{ lab.difficulty }}</span>
+      <a class="btn" href="{{ lab.url }}" style="margin-top:0;">
+        {% if p.status == 'completed' %}Review{% elif p.status == 'in_progress' %}Continue{% else %}Start{% endif %} →
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<h2>How to use this</h2>
+<ul class="checklist">
+  <li>Each lab has an <strong>Objective</strong> panel — read it before touching anything.</li>
+  <li>Each lab has a <strong>Why this happens</strong> panel — this is the part that actually sticks.</li>
+  <li>Three hints are available per lab, revealed one at a time — each one costs 10 points off that lab's score.</li>
+  <li>Found the flag? Submit it using the <strong>Submit Flag</strong> box at the bottom of any page to mark the lab complete and unlock its security writeup (CWE, severity, root cause, remediation).</li>
+  <li>Stuck badly? Ask your instructor — full walkthroughs are intentionally kept out of the student-facing app.</li>
+</ul>
+{% endblock %}

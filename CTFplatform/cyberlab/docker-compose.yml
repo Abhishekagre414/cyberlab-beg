@@ -1,0 +1,23 @@
+# NOTE: not build/run-tested in the environment this project was developed
+# in. Review before relying on it -- see README.md "Docker" section.
+
+services:
+  cyberlab:
+    build: .
+    ports:
+      # Bind to localhost only -- this app is intentionally vulnerable and
+      # must never be exposed beyond your own machine.
+      - "127.0.0.1:5000:5000"
+    environment:
+      # Keep debug mode off by default even inside the container.
+      - FLASK_DEBUG=0
+      # Optional: set a real value here (or via a .env file) for
+      # anything beyond quick local testing -- see .env.example.
+      # - SECRET_KEY=set-your-own-value-here
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped

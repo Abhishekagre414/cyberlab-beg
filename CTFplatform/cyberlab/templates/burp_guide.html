@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Burp Suite Guide — CyberLab Sim{% endblock %}
+{% block content %}
+<h1>Using Burp Suite with these Labs</h1>
+<p style="color:var(--muted)">A beginner-friendly walkthrough for pointing an intercepting proxy at this local training environment.</p>
+
+<div class="panel" style="border-left:3px solid var(--red); background:rgba(248,81,73,.08);">
+  <strong>⚠️ Scope reminder</strong>
+  <p>Only ever point Burp Suite (or any proxy/scanner) at systems you own or have explicit written permission to test — that includes this local lab, running on your own machine, and nothing else. Never aim these tools at real, third-party websites.</p>
+</div>
+
+<div class="panel">
+  <strong>Step-by-step</strong>
+  <ol class="checklist">
+    <li><strong>Start Burp Suite.</strong> Launch it and create (or open) a temporary project.</li>
+    <li><strong>Configure the browser proxy.</strong> Point your browser's proxy settings (or use a dedicated browser profile / FoxyProxy) at Burp's listener — by default <code>127.0.0.1:8080</code>.</li>
+    <li><strong>Enable interception.</strong> In Burp's Proxy tab, turn "Intercept is on" so requests pause before being sent.</li>
+    <li><strong>Visit the local CyberLab.</strong> Browse to <code>http://127.0.0.1:5000</code> through your proxied browser.</li>
+    <li><strong>Observe HTTP requests.</strong> Watch each request pass through Burp's Proxy → HTTP history. Notice headers, cookies, and form data.</li>
+    <li><strong>Send requests to Repeater.</strong> Right-click an interesting request (e.g. the Lab 2 login POST) and choose "Send to Repeater" to replay and tweak it freely.</li>
+    <li><strong>Modify parameters or cookies — only within this local lab.</strong> Try editing the <code>x_client_user_id</code> cookie for Lab 3, or the <code>username</code>/<code>password</code> fields for Lab 2.</li>
+    <li><strong>Analyze the response.</strong> Compare what changed in the response body/status code after your edit — that's the core skill this whole workflow is teaching.</li>
+  </ol>
+</div>
+
+<div class="panel">
+  <strong>Which labs pair well with Burp?</strong>
+  <ul class="checklist">
+    <li><strong>Lab 1</strong> — inspect the <code>Authorization: Basic ...</code> header once you've got Basic Auth credentials.</li>
+    <li><strong>Lab 2</strong> — use Repeater to iterate on SQL injection payloads quickly without retyping the form each time.</li>
+    <li><strong>Lab 3</strong> — edit the <code>x_client_user_id</code> cookie directly in a resent request.</li>
+    <li><strong>Lab 4</strong> — try different <code>file</code> query parameter values in Repeater.</li>
+    <li><strong>Lab 5</strong> — send different YAML payload bodies without re-typing the textarea each time.</li>
+  </ul>
+</div>
+
+<div class="panel">
+  <strong>Don't have Burp Suite?</strong>
+  <p>Your browser's built-in DevTools (Network tab + Application/Storage → Cookies) can do almost everything above for these labs — that's intentional, so nobody is blocked from any lab by tooling.</p>
+</div>
+
+<a class="btn secondary" href="/">Back to All Labs</a>
+{% endblock %}

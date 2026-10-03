@@ -1,0 +1,79 @@
+<div class="panel" id="hints">
+  <strong>Hints ({{ prog.hints_used }}/{{ total_hint_levels }} used — each costs {{ 10 }} points)</strong>
+  {% for h in unlocked_hints %}
+  <p style="margin-top:8px;"><strong>Hint {{ loop.index }}:</strong> {{ h }}</p>
+  {% endfor %}
+  {% if prog.completed %}
+  <p style="color:var(--muted); margin-top:8px;">Lab completed — hints locked.</p>
+  {% elif prog.hints_used < total_hint_levels %}
+  <form method="POST" action="/hint/{{ lab_id }}/{{ prog.hints_used + 1 }}" class="inline">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <button type="submit" class="btn secondary">Reveal hint {{ prog.hints_used + 1 }} of {{ total_hint_levels }}</button>
+  </form>
+  {% else %}
+  <p style="color:var(--muted); margin-top:8px;">No more hints available for this lab.</p>
+  {% endif %}
+  <p style="color:var(--muted); font-size:0.85em; margin-top:8px;">Note: revealing hints does not by itself mark "Identify the vulnerability" below — that's tracked separately once you've actually found it.</p>
+</div>
+
+{% if mode == 'beginner' %}
+<div class="panel" id="stages">
+  {% include "partials/stage_tracker.html" %}
+  {% if prog.explored and not prog.identified and not prog.completed %}
+  <form method="POST" action="/stage/{{ lab_id }}/identify" class="inline" style="margin-top:10px;">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <button type="submit" class="btn secondary">✅ I found the vulnerability</button>
+  </form>
+  <p style="color:var(--muted); font-size:0.85em; margin-top:4px;">Only check this once you actually understand what the bug is and why it works — not just because you're about to guess a payload.</p>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="panel">
+  <strong>Your progress on this lab</strong>
+  <p style="margin-top:6px;">Status: <strong>{{ prog.status }}</strong> &nbsp;|&nbsp; Score: <strong>{{ prog.score }}/100</strong></p>
+  <form method="POST" action="/reset/{{ lab_id }}" class="inline" onsubmit="return confirm('Reset all progress for this lab?');">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <button type="submit" class="btn secondary">Reset Lab</button>
+  </form>
+</div>
+
+{% if prog.completed %}
+{% include "partials/completion_banner.html" %}
+
+<div class="panel success" id="writeup">
+  {% set info = SECURITY_INFO_MAP[lab_id] %}
+  <strong>🔎 Security Writeup</strong>
+  <table style="margin-top:8px;">
+    <tr><th>Vulnerability</th><td>{{ info.vulnerability }}</td></tr>
+    <tr><th>CWE</th><td>{{ info.cwe }}</td></tr>
+    <tr><th>Severity</th><td>{{ info.severity }}</td></tr>
+    <tr><th>Impact</th><td>{{ info.impact }}</td></tr>
+    <tr><th>Root Cause</th><td>{{ info.root_cause }}</td></tr>
+    <tr><th>Detection</th><td>{{ info.detection }}</td></tr>
+    <tr><th>Remediation</th><td>{{ info.remediation }}</td></tr>
+  </table>
+</div>
+{% set code = CODE_EXAMPLES_MAP[lab_id] %}
+<div class="panel">
+  <strong>🔧 Vulnerable vs. Secure Code</strong>
+  <div class="code-compare">
+    <div class="col bad">
+      <strong style="color:var(--red);">❌ Vulnerable approach</strong>
+      <pre>{{ code.vulnerable }}</pre>
+    </div>
+    <div class="col good">
+      <strong style="color:var(--green);">✅ Secure approach</strong>
+      <pre>{{ code.secure }}</pre>
+    </div>
+  </div>
+  {% if not prog.remediation_viewed %}
+  <form method="POST" action="/stage/{{ lab_id }}/remediation" class="inline" style="margin-top:10px;">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <button type="submit" class="btn secondary">📖 Mark remediation as read</button>
+  </form>
+  {% else %}
+  <p style="color:var(--green); margin-top:10px;">✓ Remediation reviewed.</p>
+  {% endif %}
+</div>
+{% endif %}

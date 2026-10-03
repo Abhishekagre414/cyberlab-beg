@@ -1,0 +1,18 @@
+{% set lb = LEARN_BEFORE_MAP[lab_id] %}
+<div class="panel learn-box">
+  <strong>📘 Learn Before You Hack</strong>
+  <dl style="margin:6px 0 0;">
+    <dt>What is the vulnerability?</dt>
+    <dd>{{ lb.what }}</dd>
+    <dt>Why does it happen?</dt>
+    <dd>{{ lb.why }}</dd>
+    <dt>A simple real-world example</dt>
+    <dd>{{ lb.example }}</dd>
+    <dt>What is the possible impact?</dt>
+    <dd>{{ lb.impact }}</dd>
+    <dt>How can developers prevent it?</dt>
+    <dd>{{ lb.prevention }}</dd>
+    <dt>Tools you can use</dt>
+    <dd>{{ lb.tools }}</dd>
+  </dl>
+</div>

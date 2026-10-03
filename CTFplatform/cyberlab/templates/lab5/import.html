@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Lab 5 — Config Import{% endblock %}
+{% block content %}
+<h1>Deploy Config Import Tool</h1>
+<p style="color:var(--muted)">Internal tool, built by tejas for the deploy pipeline. Paste a YAML config below and click "Import" to parse it.</p>
+
+<form method="POST" action="/lab5/import">
+  <label for="yaml_input">YAML config</label>
+  <textarea id="yaml_input" name="yaml_input" placeholder="name: my-app&#10;env: staging">{{ raw_input }}</textarea>
+  <button type="submit">Import</button>
+</form>
+
+{% if blocked_keyword %}
+<div class="panel">
+  <strong>🛡 Blocked</strong>
+  <p>That input was rejected by a keyword filter. The filter only knows about one specific function name — it isn't the only way to run a command from a YAML tag.</p>
+</div>
+{% endif %}
+
+{% if error %}<p class="error-msg">{{ error }}</p>{% endif %}
+
+{% if result is not none and not triggered_sim %}
+<div class="panel">
+  <strong>Parsed result</strong>
+  <pre>{{ result }}</pre>
+</div>
+<p style="color:var(--muted)">Parsed fine, but nothing "ran" — this is ordinary data, not a function call.</p>
+{% endif %}
+
+{% if triggered_sim %}
+<div class="panel {{ 'success' if found_flag else '' }}">
+  <strong>{{ '✅ Simulated command execution' if found_flag else '⚙️ Simulated command executed' }}</strong>
+  <p>Your YAML tag was resolved into a function call, and that function ran with the argument you supplied.</p>
+  <pre>{{ sim_output }}</pre>
+  {% if found_flag %}
+  <div class="flag">{{ flag }}</div>
+  {% endif %}
+</div>
+{% include "partials/http_panel.html" %}
+{% endif %}
+
+{% if found_flag %}
+<h2>What actually happened</h2>
+<ul class="checklist">
+  <li>The loader used here understands YAML tags that mean "call this function with these arguments" — the shape is <code>!!python/object/apply:module.function [args]</code>.</li>
+  <li>A keyword filter blocked the single most obvious function name for "run a shell command" — but Python's standard library has more than one function that does the same thing, and the filter only knew about one of them.</li>
+  <li>In a genuinely vulnerable app using <code>yaml.load()</code> without <code>safe_load</code>, this same tag would run a <strong>real</strong> shell command, not a simulated one. This lab intercepts it so nothing actually executes.</li>
+</ul>
+<h2>How to prevent this for real</h2>
+<ul class="checklist">
+  <li>Always use <code>yaml.safe_load()</code> for any YAML that isn't 100% trusted. <code>safe_load</code> only ever builds plain Python types — it has no concept of "call this function," so there's no function-name blocklist to maintain (or fail to maintain completely) in the first place.</li>
+  <li>Keyword/name blocklisting is almost always incomplete — there are usually multiple equivalent ways to reach the same dangerous capability.</li>
+  <li>The same class of bug exists in other serialization formats too: Python's <code>pickle</code> module is far worse (deserializing untrusted pickle data is essentially always RCE) — never unpickle data from an untrusted source.</li>
+</ul>
+{% endif %}
+
+<a class="btn secondary" href="/lab5/">Back to Lab 5</a>
+{% endblock %}

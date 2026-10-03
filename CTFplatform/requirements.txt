@@ -1,0 +1,6 @@
+# Full set for Docker / VPS deployments (gunicorn + lab engine + AI resume).
+-r requirements-core.txt
+gunicorn==22.0.0
+docker==7.1.0
+psutil==5.9.8
+google-generativeai==0.7.2
